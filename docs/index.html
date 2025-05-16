@@ -19,6 +19,9 @@
       background: transparent;
       margin: 0;
       padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .calendar-container {
@@ -26,7 +29,7 @@
       background: #fff;
       border-radius: 20px;
       padding: 20px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.08);
     }
 
     .calendar-header {
@@ -39,12 +42,13 @@
     }
 
     .calendar-header button {
-      background: #f1f1f1;
+      background: #f2f2f2;
       border: none;
-      border-radius: 8px;
-      padding: 5px 10px;
-      font-size: 1em;
+      border-radius: 10px;
+      padding: 4px 10px;
+      font-size: 1.2em;
       cursor: pointer;
+      font-weight: bold;
     }
 
     .day-names {
@@ -52,7 +56,7 @@
       grid-template-columns: repeat(7, 1fr);
       color: #888;
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
       font-weight: 500;
     }
 
@@ -97,10 +101,9 @@
       color: white;
       font-weight: bold;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       cursor: pointer;
     }
-
   </style>
 </head>
 <body>
@@ -142,7 +145,7 @@
 
       monthYear.textContent = `${monthNames[month]} ${year}`
 
-      // 이전 달 날짜
+      // 이전 달
       for (let i = firstDay - 1; i >= 0; i--) {
         const d = document.createElement("div")
         d.textContent = prevLastDate - i
@@ -150,11 +153,10 @@
         calendarDays.appendChild(d)
       }
 
-      // 이번 달 날짜
+      // 현재 달
       for (let i = 1; i <= lastDate; i++) {
         const d = document.createElement("div")
         d.textContent = i
-        d.dataset.date = `${year}-${(month + 1).toString().padStart(2, "0")}-${i.toString().padStart(2, "0")}`
 
         if (isSameDate(today, year, month, i)) d.classList.add("today")
         if (isSameDate(selectedDate, year, month, i)) d.classList.add("selected")
@@ -167,7 +169,7 @@
         calendarDays.appendChild(d)
       }
 
-      // 다음 달 날짜 (빈칸 채우기용)
+      // 다음 달
       const remaining = 42 - calendarDays.childElementCount
       for (let i = 1; i <= remaining; i++) {
         const d = document.createElement("div")
