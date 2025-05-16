@@ -2,132 +2,206 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Modern Calendar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Calendar</title>
+  <link href="https://cdn.jsdelivr.net/gh/webfontworld/PaperRogi/PaperRogi.css" rel="stylesheet">
   <style>
+    :root {
+      --primary: #5d9465;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: #f9f9f9;
-    }
-    .calendar {
-      background: #fff;
-      border-radius: 16px;
-      padding: 20px;
-      width: 300px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .calendar h2 {
+      font-family: 'PaperRogi', sans-serif;
+      background: transparent;
       margin: 0;
-      font-size: 1.4em;
+      padding: 0;
+    }
+
+    .calendar-container {
+      width: 280px;
+      background: #fff;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+
+    .calendar-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      font-weight: bold;
+      font-size: 1.4em;
+      margin-bottom: 10px;
     }
-    .nav-btn {
+
+    .calendar-header button {
+      background: #f1f1f1;
       border: none;
-      background: #eee;
       border-radius: 8px;
-      width: 32px;
-      height: 32px;
+      padding: 5px 10px;
+      font-size: 1em;
       cursor: pointer;
     }
-    .day-labels, .days {
+
+    .day-names {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      margin-top: 10px;
+      color: #888;
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+
+    .day-names div {
       font-size: 0.9em;
     }
-    .day-labels div {
-      color: #888;
+
+    .days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      gap: 5px;
     }
+
     .days div {
-      margin: 4px;
-      padding: 10px;
+      padding: 10px 0;
       border-radius: 50%;
       cursor: pointer;
     }
-    .days div:hover {
-      background: #eee;
+
+    .days .prev-month,
+    .days .next-month {
+      color: #ccc;
     }
-    .selected {
-      background: #5d9465;
-      color: white;
-    }
-    .today-btn {
-      margin-top: 15px;
-      background: #5d9465;
-      color: white;
-      padding: 10px;
-      width: 100%;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+
+    .days .today {
+      background-color: var(--primary);
+      color: #fff;
       font-weight: bold;
     }
+
+    .days .selected {
+      background-color: var(--primary);
+      color: #fff;
+    }
+
+    .today-button {
+      width: 100%;
+      margin-top: 15px;
+      padding: 10px;
+      background-color: var(--primary);
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
   </style>
 </head>
 <body>
-  <div class="calendar">
-    <h2>
-      <button class="nav-btn" onclick="changeMonth(-1)">❮</button>
-      <span id="monthYear"></span>
-      <button class="nav-btn" onclick="changeMonth(1)">❯</button>
-    </h2>
-    <div class="day-labels">
-      <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+  <div class="calendar-container">
+    <div class="calendar-header">
+      <button id="prevBtn">&lt;</button>
+      <div id="monthYear"></div>
+      <button id="nextBtn">&gt;</button>
     </div>
-    <div class="days" id="days"></div>
-    <button class="today-btn" onclick="goToday()">Today</button>
+    <div class="day-names">
+      <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+    </div>
+    <div class="days" id="calendarDays"></div>
+    <button class="today-button" id="todayBtn">Today</button>
   </div>
 
   <script>
-    const daysContainer = document.getElementById('days');
-    const monthYear = document.getElementById('monthYear');
-    let selectedDate = new Date();
-    let today = new Date();
+    const calendarDays = document.getElementById("calendarDays")
+    const monthYear = document.getElementById("monthYear")
+    const prevBtn = document.getElementById("prevBtn")
+    const nextBtn = document.getElementById("nextBtn")
+    const todayBtn = document.getElementById("todayBtn")
+
+    let today = new Date()
+    let selectedDate = new Date(today)
+    let current = new Date(today)
 
     function renderCalendar(date) {
-      daysContainer.innerHTML = '';
-      let year = date.getFullYear();
-      let month = date.getMonth();
-      let firstDay = new Date(year, month, 1).getDay();
-      let lastDate = new Date(year, month + 1, 0).getDate();
-      let prevLastDate = new Date(year, month, 0).getDate();
+      calendarDays.innerHTML = ""
 
-      monthYear.innerText = `${date.toLocaleString('default', { month: 'long' })} ${year}`;
+      const year = date.getFullYear()
+      const month = date.getMonth()
+      const firstDay = new Date(year, month, 1).getDay()
+      const lastDate = new Date(year, month + 1, 0).getDate()
+      const prevLastDate = new Date(year, month, 0).getDate()
 
+      const monthNames = ["January", "February", "March", "April", "May", "June",
+                          "July", "August", "September", "October", "November", "December"]
+
+      monthYear.textContent = `${monthNames[month]} ${year}`
+
+      // 이전 달 날짜
       for (let i = firstDay - 1; i >= 0; i--) {
-        daysContainer.innerHTML += `<div style="color:#ccc">${prevLastDate - i}</div>`;
+        const d = document.createElement("div")
+        d.textContent = prevLastDate - i
+        d.classList.add("prev-month")
+        calendarDays.appendChild(d)
       }
 
+      // 이번 달 날짜
       for (let i = 1; i <= lastDate; i++) {
-        let d = new Date(year, month, i);
-        let isSelected = d.toDateString() === selectedDate.toDateString();
-        daysContainer.innerHTML += `<div class="${isSelected ? 'selected' : ''}" onclick="selectDate(${year},${month},${i})">${i}</div>`;
+        const d = document.createElement("div")
+        d.textContent = i
+        d.dataset.date = `${year}-${(month + 1).toString().padStart(2, "0")}-${i.toString().padStart(2, "0")}`
+
+        if (isSameDate(today, year, month, i)) d.classList.add("today")
+        if (isSameDate(selectedDate, year, month, i)) d.classList.add("selected")
+
+        d.addEventListener("click", () => {
+          selectedDate = new Date(year, month, i)
+          renderCalendar(current)
+        })
+
+        calendarDays.appendChild(d)
+      }
+
+      // 다음 달 날짜 (빈칸 채우기용)
+      const remaining = 42 - calendarDays.childElementCount
+      for (let i = 1; i <= remaining; i++) {
+        const d = document.createElement("div")
+        d.textContent = i
+        d.classList.add("next-month")
+        calendarDays.appendChild(d)
       }
     }
 
-    function selectDate(y, m, d) {
-      selectedDate = new Date(y, m, d);
-      renderCalendar(selectedDate);
+    function isSameDate(date, y, m, d) {
+      return (
+        date.getFullYear() === y &&
+        date.getMonth() === m &&
+        date.getDate() === d
+      )
     }
 
-    function changeMonth(offset) {
-      selectedDate.setMonth(selectedDate.getMonth() + offset);
-      renderCalendar(selectedDate);
+    prevBtn.onclick = () => {
+      current.setMonth(current.getMonth() - 1)
+      renderCalendar(current)
     }
 
-    function goToday() {
-      selectedDate = new Date();
-      renderCalendar(selectedDate);
+    nextBtn.onclick = () => {
+      current.setMonth(current.getMonth() + 1)
+      renderCalendar(current)
     }
 
-    renderCalendar(selectedDate);
+    todayBtn.onclick = () => {
+      current = new Date(today)
+      selectedDate = new Date(today)
+      renderCalendar(current)
+    }
+
+    renderCalendar(current)
   </script>
 </body>
 </html>
